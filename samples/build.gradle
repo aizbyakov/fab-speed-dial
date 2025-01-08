@@ -1,28 +1,89 @@
 apply plugin: 'com.android.application'
 
+apply from: 'signUtils.gradle'
+
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    namespace "io.github.yavski.fabspeeddial.samples"
+
+    def SIGN_CONFIG_RELEASE = getSignConfig('RELEASE', '../../../../android/keystore/keystore.properties')
+
+    signingConfigs {
+        if (SIGN_CONFIG_RELEASE) release SIGN_CONFIG_RELEASE
+    }
 
     defaultConfig {
-        applicationId "io.yavski.fabmenu.samples"
-        minSdkVersion 8
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode androidApplicationVersionCode
+        versionName androidApplicationVersionName
+
+        minSdk androidApplicationMinSdkVersion
+        compileSdk androidApplicationCompileSdkVersion
+        targetSdk androidApplicationTargetSdkVersion
+
+        archivesBaseName = "$rootProject.name-$versionName"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        if (SIGN_CONFIG_RELEASE) signingConfig signingConfigs.release
+    }
+
+    compileOptions {
+        sourceCompatibility javaSourceCompatibility
+        targetCompatibility javaTargetCompatibility
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lintOptions {
+        abortOnError true
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:design:23.3.0'
-    compile project(path: ':library')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(path: ':library')
+
+    implementation 'com.android.support:appcompat-v7:23.3.0'
+    implementation 'com.android.support:design:23.3.0'
+
+    testImplementation 'junit:junit:4.13.2'
 }
+
+
+tasks.register("cleanArtifacts", Delete) {
+    delete fileTree(dir: "$artifactsDirectory", include: "**/$rootProject.name*.apk")
+    delete fileTree(dir: "$artifactsDirectory", include: "**/$rootProject.name*.aab")
+}
+
+clean.finalizedBy(cleanArtifacts)
+
+tasks.register("copyArtifacts") {
+    def sourceRoot = "$buildDir/outputs/apk/"
+
+    doFirst{
+        println "SOURCE: $sourceRoot"
+        println "TARGET: $artifactsDirectory"
+        println ""
+
+        copy {
+            from(fileTree(sourceRoot).files)
+            into(artifactsDirectory)
+            include('*.apk')
+
+            eachFile {
+                println "FILE: $it.relativeSourcePath -> $it.relativePath"
+            }
+        }
+    }
+}
+
+build.finalizedBy(copyArtifacts)

@@ -25,7 +25,6 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.EditText;
 
-import io.github.yavski.fabmenu.samples.R;
 import io.github.yavski.fabspeeddial.FabSpeedDial;
 import io.github.yavski.fabspeeddial.SimpleMenuListenerAdapter;
 

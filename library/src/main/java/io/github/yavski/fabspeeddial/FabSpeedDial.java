@@ -55,8 +55,6 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.github.yavski.fabmenu.R;
-
 /**
  * Created by yavorivanov on 01/01/2016.
  */

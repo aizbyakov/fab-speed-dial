@@ -27,8 +27,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import io.github.yavski.fabmenu.samples.R;
-
 public class HomeActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private String[] titles;

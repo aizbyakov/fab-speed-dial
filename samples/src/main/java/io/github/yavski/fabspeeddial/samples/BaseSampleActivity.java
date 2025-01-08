@@ -5,8 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import io.github.yavski.fabmenu.samples.R;
-
 /**
  * Created by yavorivanov on 03/01/2016.
  */

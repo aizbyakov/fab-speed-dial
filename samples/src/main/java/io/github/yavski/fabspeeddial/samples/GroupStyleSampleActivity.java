@@ -19,8 +19,6 @@ package io.github.yavski.fabspeeddial.samples;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
-import io.github.yavski.fabmenu.samples.R;
-
 public class GroupStyleSampleActivity extends BaseSampleActivity {
 
     @Override

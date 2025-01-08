@@ -1,1 +1,3 @@
+rootProject.name='fab-speed-dial-sample'
+
 include ':samples', ':library'

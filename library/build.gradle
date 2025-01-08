@@ -1,38 +1,96 @@
 apply plugin: 'com.android.library'
-apply plugin: 'bintray-release'
+
+def libName = 'fab-speed-dial'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    namespace "io.github.yavski.fabspeeddial"
 
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 23
-        versionCode 8
-        versionName "1.0.7"
+        versionCode androidApplicationVersionCode
+        versionName androidApplicationVersionName
+
+        minSdk androidApplicationMinSdkVersion
+        compileSdk androidApplicationCompileSdkVersion
+        targetSdk androidApplicationTargetSdkVersion
+
+        archivesBaseName = "$libName-$versionName"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        targetCompatibility javaSourceCompatibility
+        sourceCompatibility javaSourceCompatibility
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lintOptions {
+        abortOnError true
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-v4:23.3.0'
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:design:23.3.0'
-    compile 'com.android.support:cardview-v7:23.3.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.support:support-v4:23.3.0'
+    implementation 'com.android.support:appcompat-v7:23.3.0'
+    implementation 'com.android.support:design:23.3.0'
+    implementation 'com.android.support:cardview-v7:23.3.0'
+
+    testImplementation 'junit:junit:4.13.2'
 }
 
-publish {
-    userOrg = 'yavski'
-    groupId = 'io.github.yavski'
-    artifactId = 'fab-speed-dial'
-    publishVersion = '1.0.7'
+tasks.register("cleanArtifacts", Delete) {
+    delete fileTree(dir: "$artifactsDirectory" , include: "**/${libName}*.aar")
+    delete fileTree(dir: "$artifactsDirectory" , include: "**/${libName}*sources.jar")
 }
 
-// apply from: './maven.gradle'
+clean.finalizedBy(cleanArtifacts)
+
+tasks.register("copyArtifacts") {
+    def sourceRoot = "$buildDir/outputs/aar"
+
+    doFirst {
+        println "SOURCE: $sourceRoot"
+        println "TARGET: $artifactsDirectory"
+        println ""
+
+        copy {
+            from(fileTree(sourceRoot).files)
+            into(artifactsDirectory)
+            include("*.aar")
+
+            eachFile {
+                println "FILE: $it.relativeSourcePath -> $it.relativePath"
+            }
+        }
+    }
+}
+
+build.finalizedBy(copyArtifacts)
+
+
+tasks.register("generateSourcesJar") {
+    def sourcesRoot = "$projectDir/src/main/java"
+    def cmd = "jar cvf \"$artifactsDirectory/$archivesBaseName-sources.jar\" -C \"$sourcesRoot/\" io"
+
+    doFirst {
+        println "GENERATE SOURCES JAR"
+        println "SOURCES: $sourcesRoot"
+        println "CMD: $cmd"
+
+        exec {
+            commandLine 'cmd', '/c', cmd
+        }
+    }
+}
+
+copyArtifacts.finalizedBy(generateSourcesJar)
